@@ -4,17 +4,26 @@ from PIL import Image
 import pygame
 import cv2
 
+# dit is voor het veranderen van pixels naar ascii
 def pix2ascii(image, range_width=25, new_line_width=100):
+    
+    #alle ascii characters
     ASCII_CHARS = ' .,-~^*_:;<>+=|!1ilI/\()[]?%&8B@$MZ0OQLR#$'
+    
     pixels = image.convert('L').getdata()
     ascii_str = ''
+    
+    # elke pixel word veranderd
     for i, pixel_value in enumerate(pixels):
-        # Use int() instead of type casting
         ascii_str += ASCII_CHARS[int(pixel_value * (len(ASCII_CHARS) - 1) / 256)]
+        
+        # als er een nieuwe lijn moet komen komt die
         if (i+1) % new_line_width == 0:
-            ascii_str += '\n'  # Insert a newline after a certain number of characters
+            ascii_str += '\n' 
+            
     return ascii_str
 
+# camera naar ascii
 def cam2ascii(max_width=100, max_height=60):
     cap = cv2.VideoCapture(0)
 
@@ -23,21 +32,28 @@ def cam2ascii(max_width=100, max_height=60):
         if not ret:
             break
 
+        # maakt het grayscale
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        resized_gray = cv2.resize(gray, (max_width, max_height))  # Use the user-defined size
+        resized_gray = cv2.resize(gray, (max_width, max_height))
         image = Image.fromarray(resized_gray)
 
-        ascii_str = pix2ascii(image)  # Assuming you have the map_pixels_to_ascii function from previous examples
+        # gebruikt de pix2ascii converter
+        ascii_str = pix2ascii(image)
 
-        print(ascii_str)  # Display the ASCII art in the console
+        print(ascii_str)
 
+        # eigenlijk nutteloos maar laat me
         if cv2.waitKey(1) & 0xFF == ord('q'):
             break
 
+    # camera gaat uit
     cap.release()
     cv2.destroyAllWindows()
     
-def vid2ascii(file_path, FPS, max_width=100, max_height=100):
+# video naar ascii
+def vid2ascii(file_path, max_width=100, max_height=100):
+    
+    # video
     video_clip = mp.VideoFileClip(file_path)
     audio_clip = video_clip.audio
 
@@ -50,26 +66,28 @@ def vid2ascii(file_path, FPS, max_width=100, max_height=100):
     temp_audio_file = 'temp_audio.wav'
     audio_clip.write_audiofile(temp_audio_file)
 
+    # audio start
     pygame.mixer.music.load(temp_audio_file)
     pygame.mixer.music.play()
 
-    for frame in video_clip.iter_frames(fps=FPS, dtype='uint8'):
+    # elke frame word gegraysceled en geconvert
+    for frame in video_clip.iter_frames(fps=fps, dtype='uint8'):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         resized_gray = cv2.resize(gray, (max_width, max_height))
         image = Image.fromarray(resized_gray)
 
         ascii_str = pix2ascii(image)
         print(ascii_str)
-
-    while pygame.mixer.music.get_busy():
-        pygame.time.Clock().tick(10)
-
+        
     cap.release()
     cv2.destroyAllWindows()
     
+# foto naar ascii
 def img2ascii(file_path):
+    
+    # convert foto -> ascii
     image = Image.open(file_path)
-    image = image.resize((100, 100), Image.LANCZOS)  # Use Image.LANCZOS as the resampling filter
+    image = image.resize((100, 100), Image.LANCZOS)
     ascii_str = pix2ascii(image)
 
     return ascii_str
@@ -92,7 +110,7 @@ def fromUpload():
     elif extension == 'mp4':
         fps = float(input('how much fps does this video run at? '))
         
-        ascii_str = vid2ascii(file_path, fps)
+        ascii_str = vid2ascii(file_path)
         
     else:
         print('for image only png, jpg, jpeg or webp files are possible\nfor video only mp4. ')
