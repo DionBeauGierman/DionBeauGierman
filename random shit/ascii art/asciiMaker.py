@@ -1,4 +1,3 @@
-from tkinter import filedialog as fd
 import moviepy.editor as mp
 from PIL import Image
 import pygame
@@ -51,14 +50,13 @@ def cam2ascii(max_width=100, max_height=60):
     cv2.destroyAllWindows()
     
 # video naar ascii
-def vid2ascii(file_path, max_width=100, max_height=100):
+def vid2ascii(file_path, FPS, max_width=100, max_height=100):
     
     # video
     video_clip = mp.VideoFileClip(file_path)
     audio_clip = video_clip.audio
 
     cap = cv2.VideoCapture(file_path)
-    fps = cap.get(cv2.CAP_PROP_FPS)
 
     pygame.init()
     pygame.mixer.init()
@@ -71,7 +69,7 @@ def vid2ascii(file_path, max_width=100, max_height=100):
     pygame.mixer.music.play()
 
     # elke frame word gegraysceled en geconvert
-    for frame in video_clip.iter_frames(fps=fps, dtype='uint8'):
+    for frame in video_clip.iter_frames(fps=FPS, dtype='uint8'):
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         resized_gray = cv2.resize(gray, (max_width, max_height))
         image = Image.fromarray(resized_gray)
@@ -110,7 +108,7 @@ def fromUpload():
     elif extension == 'mp4':
         fps = float(input('how much fps does this video run at? '))
         
-        ascii_str = vid2ascii(file_path)
+        ascii_str = vid2ascii(file_path, fps)
         
     else:
         print('for image only png, jpg, jpeg or webp files are possible\nfor video only mp4. ')
