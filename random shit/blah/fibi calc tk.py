@@ -6,7 +6,7 @@ def calculate_fibonacci():
     sequence = [a, b]
     for _ in range(2, length):
         a, b = b, a + b
-        sequence.append(b)
+        sequence += b
     result_label.config(text=f"The Fibi sequence with length {length} is: {sequence}")
 
 window = tk.Tk()
